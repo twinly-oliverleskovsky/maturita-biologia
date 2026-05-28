@@ -5544,7 +5544,7 @@ function mdToHtml(text) {
         tbl += "</tr>";
       });
       tbl += "</tbody></table>";
-      html += tbl;
+      html += `<div class="bio-table-wrap">${tbl}</div>`;
       continue;
     }
 
@@ -5650,8 +5650,32 @@ const SANS = `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`;
 function mdStyles(t) {
   return `
 * { box-sizing:border-box; }
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  height: 100%;
+}
 html, body, #root { margin:0; padding:0; height:100%; background:${t.base}; }
+body { overscroll-behavior-y: none; }
 ::selection { background:rgba(255,255,255,0.18); }
+.bio-root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+}
+.bio-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 18px 0;
+  border-radius: 8px;
+  border: 1px solid ${t.border};
+}
+.bio-table-wrap table { margin: 0 !important; min-width: 520px; }
+.bio-mode-short { display: none; }
+.bio-btn-short { display: none; }
+.bio-drawer-close { display: none; }
+.bio-layout-backdrop { display: none; }
 .bio-md { line-height:1.85; font-size:15.5px; color:${t.text}; max-width:880px; letter-spacing:0.1px;
   word-wrap:break-word; overflow-wrap:anywhere; }
 .bio-md h1, .bio-md h2 { font-family:${SERIF}; font-size:23px; font-weight:600; margin:30px 0 14px;
@@ -5763,30 +5787,113 @@ html, body, #root { margin:0; padding:0; height:100%; background:${t.base}; }
 .bio-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:40;
   -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
   animation: bio-appfade 0.2s ease both; }
+@media (hover: none) {
+  .bio-zbtn:hover { background:inherit !important; transform:none !important; }
+}
 @media (max-width: 820px) {
-  .bio-hamburger { display:inline-flex !important; }
+  .bio-hamburger {
+    display:inline-flex !important; align-items:center; justify-content:center;
+    min-width:44px; min-height:44px; padding:10px !important;
+  }
   .bio-sidebar {
     position:fixed !important; top:0; left:0; bottom:0; height:100% !important;
-    width:min(88vw, 320px) !important; max-width:320px !important; min-width:0 !important;
-    z-index:50; transform:translateX(0); transition:transform .25s ease;
-    box-shadow:0 0 50px rgba(0,0,0,0.7);
+    width:min(92vw, 340px) !important; max-width:340px !important; min-width:0 !important;
+    z-index:50; transform:translateX(0); transition:transform .28s cubic-bezier(0.22,1,0.36,1);
+    box-shadow:0 0 60px rgba(0,0,0,0.75);
+    padding-top:env(safe-area-inset-top, 0);
+    padding-bottom:env(safe-area-inset-bottom, 0);
   }
+  .bio-drawer-close { display:inline-flex !important; }
+  .bio-sidebar-hint { display:none !important; }
   .bio-main { flex:1 1 100% !important; width:100% !important; min-width:0 !important; }
   .bio-resize-handle { display:none !important; }
-  .bio-header { padding:16px 18px 0 !important; }
-  .bio-headrow { gap:12px !important; margin-bottom:14px !important; }
-  .bio-title { font-size:21px !important; }
-  .bio-content { padding:22px 18px 40px !important; }
-  .bio-footer { padding:12px 18px !important; }
-  .bio-md { font-size:15px !important; }
-  .bio-md h1, .bio-md h2 { font-size:20px !important; }
+  .bio-header {
+    position:sticky; top:0; z-index:30;
+    padding:max(10px, env(safe-area-inset-top, 0)) max(14px, env(safe-area-inset-right, 0)) 0 max(14px, env(safe-area-inset-left, 0)) !important;
+  }
+  .bio-headrow { gap:10px !important; margin-bottom:12px !important; align-items:center !important; }
+  .bio-header-actions { flex-direction:row !important; align-items:center !important; gap:6px !important; }
+  .bio-btn-full { display:none !important; }
+  .bio-btn-short { display:inline !important; }
+  .bio-title { font-size:20px !important; line-height:1.35 !important; }
+  .bio-zadanie-label { font-size:10px !important; margin-bottom:6px !important; }
+  .bio-content {
+    padding:20px max(16px, env(safe-area-inset-right, 0)) max(28px, env(safe-area-inset-bottom, 0)) max(16px, env(safe-area-inset-left, 0)) !important;
+    -webkit-overflow-scrolling:touch;
+  }
+  .bio-focus .bio-content {
+    padding:18px max(16px, env(safe-area-inset-right, 0)) max(80px, calc(28px + env(safe-area-inset-bottom, 0))) max(16px, env(safe-area-inset-left, 0)) !important;
+  }
+  .bio-footer {
+    position:sticky; bottom:0; z-index:25;
+    padding:10px max(14px, env(safe-area-inset-right, 0)) max(12px, env(safe-area-inset-bottom, 0)) max(14px, env(safe-area-inset-left, 0)) !important;
+    gap:8px !important;
+  }
+  .bio-footer .bio-actbtn {
+    flex:1; justify-content:center; min-height:46px; padding:10px 12px !important;
+  }
+  .bio-footer .bio-nav-counter { flex-shrink:0; min-width:52px; text-align:center; }
+  .bio-md { font-size:16px !important; max-width:none !important; line-height:1.78 !important; }
+  .bio-md h1, .bio-md h2 { font-size:20px !important; margin:24px 0 12px !important; }
   .bio-md h3 { font-size:17px !important; }
   .bio-md table { font-size:13px; }
-  .bio-actbtn { padding:8px 12px !important; font-size:12px !important; }
+  .bio-md thead { display:table-header-group !important; }
+  .bio-md tbody { display:table-row-group !important; }
+  .bio-md tr { display:table-row !important; }
+  .bio-md th, .bio-md td { padding:10px; }
+  .bio-actbtn { padding:10px 14px !important; font-size:13px !important; }
+  .bio-input-wrap input {
+    font-size:16px !important; padding:12px 14px !important; min-height:48px;
+  }
+  .bio-zbtn { padding:15px 16px !important; min-height:52px; }
+  .bio-mode-row { width:100% !important; display:flex !important; }
+  .bio-mode-row .bio-mode-btn {
+    flex:1; min-height:46px !important; padding:11px 10px !important; font-size:13px !important;
+  }
+  .bio-tabs-scroll {
+    display:flex !important; flex-wrap:nowrap !important; gap:8px;
+    overflow-x:auto; -webkit-overflow-scrolling:touch;
+    scrollbar-width:none; padding-bottom:4px; margin-bottom:12px;
+  }
+  .bio-tabs-scroll::-webkit-scrollbar { display:none; }
+  .bio-tab-btn {
+    flex:0 0 auto !important; max-width:min(78vw, 300px) !important;
+    min-height:50px !important; padding:11px 14px !important;
+    border:1px solid ${t.border} !important; border-radius:8px !important;
+    margin-bottom:0 !important; background:rgba(255,255,255,0.02) !important;
+  }
+  .bio-tab-btn::after { display:none !important; }
+  .bio-tab-btn.bio-tab-active {
+    background:rgba(201,169,106,0.14) !important;
+    border-color:rgba(201,169,106,0.5) !important;
+    color:${t.text} !important;
+  }
+  .bio-layout-backdrop { display:block !important; }
+  .bio-layout-panel {
+    position:fixed !important; left:0 !important; right:0 !important; bottom:0 !important; top:auto !important;
+    width:100% !important; max-width:none !important; margin:0 !important;
+    border-radius:16px 16px 0 0 !important;
+    padding:16px max(16px, env(safe-area-inset-right, 0)) max(20px, env(safe-area-inset-bottom, 0)) max(16px, env(safe-area-inset-left, 0)) !important;
+    z-index:80 !important; max-height:80vh; overflow-y:auto;
+    box-shadow:0 -20px 60px rgba(0,0,0,0.55) !important;
+  }
+  .bio-layout-hint-desktop { display:none !important; }
+  .bio-focus-bar {
+    left:max(14px, env(safe-area-inset-left, 0)) !important;
+    right:max(14px, env(safe-area-inset-right, 0)) !important;
+    bottom:max(14px, env(safe-area-inset-bottom, 0)) !important;
+    flex-direction:column !important; align-items:stretch !important;
+  }
+  .bio-focus-bar .bio-actbtn { width:100%; min-height:46px; justify-content:center; }
+  .bio-drawer-head { padding-top:12px !important; }
 }
 @media (max-width: 480px) {
-  .bio-content { padding:18px 14px 36px !important; }
+  .bio-title { font-size:18px !important; }
+  .bio-content { padding:16px 14px 28px !important; }
+  .bio-mode-long { display:none !important; }
+  .bio-mode-short { display:inline !important; }
   .bio-footer .bio-navlabel { display:none; }
+  .bio-tagline { font-size:10px !important; letter-spacing:1.5px !important; }
 }
 `;
 }
@@ -5801,6 +5908,7 @@ export default function App() {
   const [layoutOpen, setLayoutOpen] = useState(false);
   const [resizing, setResizing] = useState(false);
   const resizeRef = useRef({ startX: 0, startW: 310 });
+  const sidebarRef = useRef(null);
   const isMobile = useIsMobile(MOBILE_BP);
 
   const t = T;
@@ -5830,6 +5938,32 @@ export default function App() {
   useEffect(() => {
     if (!isMobile) setNavOpen(false);
   }, [isMobile]);
+
+  useEffect(() => {
+    if (navOpen) setLayoutOpen(false);
+  }, [navOpen]);
+
+  useEffect(() => {
+    if (!isMobile || !navOpen || !sidebarRef.current) return;
+    const el = sidebarRef.current;
+    let startX = 0;
+    let startY = 0;
+    const onTouchStart = (e) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    };
+    const onTouchEnd = (e) => {
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = Math.abs(e.changedTouches[0].clientY - startY);
+      if (dy < 48 && dx < -56) setNavOpen(false);
+    };
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [isMobile, navOpen]);
 
   useEffect(() => {
     if (!resizing) return;
@@ -5935,8 +6069,12 @@ export default function App() {
   };
 
   return (
-    <div className={`bio-root${focusMode ? " bio-focus" : ""}`} style={{ display:"flex", height:"100vh", fontFamily:SANS, background:t.base, color:t.text }}>
+    <div className={`bio-root${focusMode ? " bio-focus" : ""}${isMobile ? " bio-mobile" : ""}`} style={{ display:"flex", fontFamily:SANS, background:t.base, color:t.text }}>
       <style>{mdStyles(t)}</style>
+
+      {layoutOpen && isMobile && (
+        <div className="bio-layout-backdrop bio-no-print" onClick={() => setLayoutOpen(false)} aria-hidden="true" />
+      )}
 
       {/* mobilný overlay */}
       {navOpen && <div className="bio-overlay bio-no-print" onClick={() => setNavOpen(false)} />}
@@ -5944,6 +6082,7 @@ export default function App() {
       {/* ── LEFT SIDEBAR ── */}
       {showSidebarPanel && (
       <div
+        ref={sidebarRef}
         className={`bio-no-print bio-sidebar bio-sidebar-enter${!isMobile && navOpen ? " bio-open" : ""}`}
         style={isMobile ? {
           display:"flex", flexDirection:"column",
@@ -5963,10 +6102,19 @@ export default function App() {
           aria-orientation="vertical"
         />
         )}
-        <div style={{ padding:"20px 18px 16px", borderBottom:`1px solid ${t.border}` }}>
-          <div style={{ marginBottom:16 }}>
-            <div style={{ fontFamily:SERIF, fontWeight:600, fontSize:20, letterSpacing:"0.4px", color:t.text }}>Maturita Biológia</div>
-            <div style={{ fontSize:11, color:t.textSec, textTransform:"uppercase", letterSpacing:"2px", marginTop:4 }}>Ústna maturita · 30 zadaní</div>
+        <div className="bio-drawer-head" style={{ padding:"20px 18px 16px", borderBottom:`1px solid ${t.border}` }}>
+          <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:12, marginBottom:16 }}>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontFamily:SERIF, fontWeight:600, fontSize:20, letterSpacing:"0.4px", color:t.text }}>Maturita Biológia</div>
+              <div className="bio-tagline" style={{ fontSize:11, color:t.textSec, textTransform:"uppercase", letterSpacing:"2px", marginTop:4 }}>Ústna maturita · 30 zadaní</div>
+            </div>
+            <button
+              type="button"
+              className="bio-drawer-close bio-actbtn"
+              onClick={() => setNavOpen(false)}
+              aria-label="Zatvoriť zoznam"
+              style={{ ...btn(), minWidth:44, minHeight:44, padding:0, flexShrink:0, fontSize:20, lineHeight:1 }}
+            >×</button>
           </div>
 
           <div className="bio-input-wrap" style={{ width:"100%" }}>
@@ -6016,7 +6164,7 @@ export default function App() {
           {filtered.length === 0 && <div style={{ padding:18, color:t.textSec, fontSize:13 }}>Žiadne výsledky.</div>}
         </div>
 
-        <div style={{ padding:"12px 18px", borderTop:`1px solid ${t.border}`, fontSize:10.5, color:t.textSec, letterSpacing:"0.5px", textTransform:"uppercase" }}>
+        <div className="bio-sidebar-hint" style={{ padding:"12px 18px", borderTop:`1px solid ${t.border}`, fontSize:10.5, color:t.textSec, letterSpacing:"0.5px", textTransform:"uppercase" }}>
           ←/→ zadania · 1/2/3 záložky · F čítanie
         </div>
       </div>
@@ -6026,42 +6174,50 @@ export default function App() {
       <div className="bio-main" style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden" }}>
 
         {/* header */}
-        <div className="bio-no-print bio-header" style={{ padding: focusMode ? "12px 24px" : "22px 32px 0", paddingBottom: effectiveHeaderExtras ? 0 : 12, borderBottom:`1px solid ${t.border}`, background:t.elevated, position:"relative" }}>
-          <div className="bio-headrow" style={{ display:"flex", alignItems:"flex-start", gap:12, marginBottom: effectiveHeaderExtras ? 18 : 0 }}>
+        <div className="bio-no-print bio-header" style={{
+          padding: isMobile ? undefined : (focusMode ? "12px 24px" : "22px 32px 0"),
+          paddingBottom: isMobile ? undefined : (effectiveHeaderExtras ? 0 : 12),
+          borderBottom:`1px solid ${t.border}`, background:t.elevated, position:"relative",
+        }}>
+          <div className="bio-headrow" style={{ display:"flex", alignItems:"flex-start", gap:12, marginBottom: effectiveHeaderExtras ? (isMobile ? 10 : 18) : 0 }}>
             <button
               className="bio-hamburger bio-actbtn"
               onClick={() => { if (!isMobile && !sidebarVisible) patchLayout({ sidebarVisible: true }); setNavOpen(true); }}
               aria-label="Otvoriť zoznam zadaní"
-              style={{ border:`1px solid ${t.border}`, background:"transparent", color:t.text, borderRadius:6, cursor:"pointer", padding:"7px 9px", flexShrink:0, lineHeight:0, marginTop:2 }}
+              style={{ border:`1px solid ${t.border}`, background:"transparent", color:t.text, borderRadius:8, cursor:"pointer", flexShrink:0, lineHeight:0 }}
             >
               <span style={{ display:"block", width:18, height:2, background:t.text, boxShadow:`0 5px 0 ${t.text}, 0 10px 0 ${t.text}` }} />
             </button>
             <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ fontSize:11, color:t.textSec, marginBottom:8, textTransform:"uppercase", letterSpacing:"2px" }}>Zadanie {selId} / 30</div>
-              <div key={`title-${cKey}`} className="bio-title bio-title-enter" style={{ fontFamily:SERIF, fontWeight:600, fontSize: focusMode ? 22 : 26, lineHeight:1.3, wordBreak:"break-word", letterSpacing:"0.2px" }}>{topic?.n}</div>
+              <div className="bio-zadanie-label" style={{ fontSize:11, color:t.textSec, marginBottom:8, textTransform:"uppercase", letterSpacing:"2px" }}>Zadanie {selId} / 30</div>
+              <div key={`title-${cKey}`} className="bio-title bio-title-enter" style={{ fontFamily:SERIF, fontWeight:600, fontSize: focusMode ? (isMobile ? 20 : 22) : (isMobile ? 20 : 26), lineHeight:1.3, wordBreak:"break-word", letterSpacing:"0.2px" }}>{topic?.n}</div>
             </div>
-            <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:8, flexShrink:0 }}>
+            <div className="bio-header-actions" style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:8, flexShrink:0 }}>
               <button
                 type="button"
                 className="bio-actbtn"
                 onClick={() => setLayoutOpen(o => !o)}
                 aria-label="Nastavenie rozloženia"
+                aria-expanded={layoutOpen}
                 title="Upraviť panely"
-                style={{ ...btn(), padding:"7px 12px", fontSize:12, borderColor: layoutOpen ? "rgba(201,169,106,0.5)" : t.border }}
+                style={{ ...btn(), padding:"10px 12px", fontSize:12, minHeight:44, borderColor: layoutOpen ? "rgba(201,169,106,0.5)" : t.border }}
               >
-                Rozloženie
+                <span className="bio-btn-full">Rozloženie</span>
+                <span className="bio-btn-short">Panel</span>
               </button>
               {focusMode && (
-                <span style={{ fontSize:10, color:t.gold, letterSpacing:"1px", textTransform:"uppercase" }}>Režim čítania</span>
+                <span className="bio-btn-full" style={{ fontSize:10, color:t.gold, letterSpacing:"1px", textTransform:"uppercase" }}>Režim čítania</span>
               )}
             </div>
           </div>
 
           {layoutOpen && (
             <div className="bio-layout-panel bio-no-print" style={{
-              position:"absolute", top:"100%", right:24, zIndex:60, marginTop:8,
-              width:280, padding:14, borderRadius:10, border:`1px solid ${t.border}`,
-              background:"#0d0d0d", boxShadow:"0 16px 48px rgba(0,0,0,0.55)",
+              ...(isMobile ? {} : {
+                position:"absolute", top:"100%", right:24, zIndex:60, marginTop:8, width:280,
+              }),
+              padding:14, borderRadius: isMobile ? undefined : 10, border:`1px solid ${t.border}`,
+              background:"#0d0d0d", boxShadow: isMobile ? undefined : "0 16px 48px rgba(0,0,0,0.55)",
             }}>
               <div style={{ fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:"1.5px", color:t.textSec, marginBottom:12 }}>
                 Upraviť panely
@@ -6072,8 +6228,8 @@ export default function App() {
                 <LayoutToggle label="Pätička (navigácia)" on={showFooter} onClick={() => patchLayout({ showFooter: !showFooter })} />
                 <LayoutToggle label="Režim čítania" hint="F" on={focusMode} onClick={() => patchLayout({ focusMode: !focusMode })} />
               </div>
-              <div style={{ marginTop:12, paddingTop:12, borderTop:`1px solid ${t.borderSoft}`, fontSize:11, color:t.textSec, lineHeight:1.5 }}>
-                Šírku bočného panelu zmeníš potiahnutím na jeho pravom okraji.
+              <div className="bio-layout-hint-desktop" style={{ marginTop:12, paddingTop:12, borderTop:`1px solid ${t.borderSoft}`, fontSize:11, color:t.textSec, lineHeight:1.5 }}>
+                {isMobile ? "Zoznam zadaní otvoríš cez menu vľavo hore. Potiahnutím doľava drawer zatvoríš." : "Šírku bočného panelu zmeníš potiahnutím na jeho pravom okraji."}
               </div>
               <button type="button" className="bio-actbtn" onClick={() => setLayout({ ...DEFAULT_LAYOUT })}
                 style={{ ...btn(), width:"100%", marginTop:10, fontSize:11, color:t.textSec }}
@@ -6083,10 +6239,10 @@ export default function App() {
 
           <div className="bio-header-extras" style={{ display: effectiveHeaderExtras ? "block" : "none" }}>
           {/* prepínač režimu */}
-          <div style={{ display:"flex", gap:0, marginTop:14, marginBottom:14, border:`1px solid ${t.border}`, borderRadius:8, overflow:"hidden", width:"fit-content", maxWidth:"100%" }}>
+          <div className="bio-mode-row" style={{ display:"flex", gap:0, marginTop:14, marginBottom:14, border:`1px solid ${t.border}`, borderRadius:8, overflow:"hidden", width:"fit-content", maxWidth:"100%" }}>
             {[
-              { id:"kratke", label:"Stručne" },
-              { id:"rozpravanie", label:"Rozprávanie (20 min)" },
+              { id:"kratke", short:"Stručne", long:"Stručne" },
+              { id:"rozpravanie", short:"Rozpráv.", long:"Rozprávanie (20 min)" },
             ].map((m, i) => {
               const act = mode === m.id;
               return (
@@ -6098,7 +6254,10 @@ export default function App() {
                     fontWeight: act ? 700 : 500, letterSpacing:"0.3px",
                     borderLeft: i > 0 ? `1px solid ${t.border}` : "none",
                   }}
-                >{m.label}</button>
+                >
+                  <span className="bio-mode-long">{m.long}</span>
+                  <span className="bio-mode-short">{m.short}</span>
+                </button>
               );
             })}
           </div>
@@ -6111,7 +6270,7 @@ export default function App() {
           )}
 
           {/* tabs */}
-          <div style={{ display:"flex", gap:4, flexWrap:"wrap" }}>
+          <div className="bio-tabs-scroll" style={{ display:"flex", gap:4, flexWrap:"wrap" }}>
             {zadanie?.topics.map((tp, i) => {
               const act = tab === i;
               return (
@@ -6137,7 +6296,10 @@ export default function App() {
         </div>
 
         {/* content */}
-        <div className="bio-scroll bio-content" style={{ flex:1, overflowY:"auto", padding: focusMode ? "28px clamp(20px, 5vw, 64px) 56px" : "32px 40px 48px" }}>
+        <div className="bio-scroll bio-content" style={{
+          flex:1, overflowY:"auto", WebkitOverflowScrolling:"touch",
+          padding: isMobile ? undefined : (focusMode ? "28px clamp(20px, 5vw, 64px) 56px" : "32px 40px 48px"),
+        }}>
           <div key={cKey} className="bio-content-enter">
             <div className="bio-no-print" style={{ display:"inline-flex", alignItems:"center", gap:9, marginBottom:24, fontSize:11, fontWeight:600, color:t.textSec, flexWrap:"wrap", lineHeight:1.4, maxWidth:"100%", textTransform:"uppercase", letterSpacing:"1px" }}>
               <Badge tk={topic?.k} size={20} />
@@ -6151,36 +6313,37 @@ export default function App() {
 
         {/* footer nav */}
         {effectiveFooter && (
-        <div className="bio-no-print bio-footer" style={{ padding:"14px 32px", borderTop:`1px solid ${t.border}`, display:"flex", justifyContent:"space-between", alignItems:"center", gap:12, background:t.elevated }}>
+        <div className="bio-no-print bio-footer" style={{
+          padding: isMobile ? undefined : "14px 32px",
+          borderTop:`1px solid ${t.border}`, display:"flex", justifyContent:"space-between", alignItems:"center", gap:12, background:t.elevated,
+        }}>
           <button
             className="bio-actbtn"
             onClick={() => { if (idx > 0) { setSelId(ZADANIA[idx - 1].id); setTab(0); } }}
             disabled={selId === 1}
             style={btn({ opacity: selId === 1 ? 0.3 : 1, cursor: selId === 1 ? "default" : "pointer" })}
-          >← <span className="bio-navlabel">Predchádzajúce</span></button>
-          <span style={{ fontSize:12, color:t.textSec, letterSpacing:"1px", flexShrink:0 }}>{selId} / 30</span>
+          >← <span className="bio-navlabel">Predch.</span></button>
+          <span className="bio-nav-counter" style={{ fontSize:12, color:t.textSec, letterSpacing:"1px", flexShrink:0 }}>{selId} / 30</span>
           <button
             className="bio-actbtn"
             onClick={() => { if (idx < ZADANIA.length - 1) { setSelId(ZADANIA[idx + 1].id); setTab(0); } }}
             disabled={selId === 30}
             style={btn({ opacity: selId === 30 ? 0.3 : 1, cursor: selId === 30 ? "default" : "pointer" })}
-          ><span className="bio-navlabel">Nasledujúce</span> →</button>
+          ><span className="bio-navlabel">Nasled.</span> →</button>
         </div>
         )}
 
         {/* plávajúce ovládanie v režime čítania */}
         {focusMode && (
-          <div className="bio-no-print" style={{
+          <div className="bio-no-print bio-focus-bar" style={{
             position:"fixed", bottom:20, right:20, zIndex:70, display:"flex", gap:8, flexWrap:"wrap", justifyContent:"flex-end",
           }}>
             <button type="button" className="bio-actbtn" onClick={() => patchLayout({ focusMode: false })}
-              style={{ ...btn(), background:"rgba(10,10,10,0.92)", boxShadow:"0 8px 24px rgba(0,0,0,0.4)" }}
-            >Ukončiť čítanie (F)</button>
-            {!effectiveSidebar && (
-              <button type="button" className="bio-actbtn" onClick={() => patchLayout({ sidebarVisible: true })}
-                style={{ ...btn(), background:"rgba(10,10,10,0.92)", boxShadow:"0 8px 24px rgba(0,0,0,0.4)" }}
-              >Zoznam zadaní</button>
-            )}
+              style={{ ...btn(), background:"rgba(10,10,10,0.94)", boxShadow:"0 8px 24px rgba(0,0,0,0.45)" }}
+            >Ukončiť čítanie</button>
+            <button type="button" className="bio-actbtn" onClick={() => setNavOpen(true)}
+              style={{ ...btn(), background:"rgba(10,10,10,0.94)", boxShadow:"0 8px 24px rgba(0,0,0,0.45)" }}
+            >Zoznam zadaní</button>
           </div>
         )}
       </div>
