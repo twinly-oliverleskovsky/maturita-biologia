@@ -5627,6 +5627,23 @@ function clamp(n, min, max) {
   return Math.min(max, Math.max(min, n));
 }
 
+const MOBILE_BP = 820;
+
+function useIsMobile(bp = MOBILE_BP) {
+  const query = `(max-width: ${bp}px)`;
+  const [mobile, setMobile] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(query).matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const onChange = () => setMobile(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, [query]);
+  return mobile;
+}
+
 const SERIF = `Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif`;
 const SANS = `system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`;
 
@@ -5748,11 +5765,14 @@ html, body, #root { margin:0; padding:0; height:100%; background:${t.base}; }
   animation: bio-appfade 0.2s ease both; }
 @media (max-width: 820px) {
   .bio-hamburger { display:inline-flex !important; }
-  .bio-sidebar { position:fixed !important; top:0; left:0; bottom:0; height:100% !important;
-    width:86% !important; max-width:330px !important; z-index:50;
-    transform:translateX(-100%); transition:transform .25s ease;
-    box-shadow:0 0 50px rgba(0,0,0,0.7); }
-  .bio-sidebar.bio-open { transform:translateX(0); }
+  .bio-sidebar {
+    position:fixed !important; top:0; left:0; bottom:0; height:100% !important;
+    width:min(88vw, 320px) !important; max-width:320px !important; min-width:0 !important;
+    z-index:50; transform:translateX(0); transition:transform .25s ease;
+    box-shadow:0 0 50px rgba(0,0,0,0.7);
+  }
+  .bio-main { flex:1 1 100% !important; width:100% !important; min-width:0 !important; }
+  .bio-resize-handle { display:none !important; }
   .bio-header { padding:16px 18px 0 !important; }
   .bio-headrow { gap:12px !important; margin-bottom:14px !important; }
   .bio-title { font-size:21px !important; }
@@ -5781,11 +5801,12 @@ export default function App() {
   const [layoutOpen, setLayoutOpen] = useState(false);
   const [resizing, setResizing] = useState(false);
   const resizeRef = useRef({ startX: 0, startW: 310 });
+  const isMobile = useIsMobile(MOBILE_BP);
 
   const t = T;
   const { sidebarVisible, sidebarWidth, showFooter, showHeaderExtras, focusMode } = layout;
   const effectiveSidebar = sidebarVisible && !focusMode;
-  const showSidebarPanel = effectiveSidebar || navOpen;
+  const showSidebarPanel = isMobile ? navOpen : (effectiveSidebar || navOpen);
   const effectiveHeaderExtras = showHeaderExtras && !focusMode;
   const effectiveFooter = showFooter && !focusMode;
 
@@ -5798,6 +5819,17 @@ export default function App() {
   useEffect(() => {
     try { localStorage.setItem(LS_LAYOUT, JSON.stringify(layout)); } catch {}
   }, [layout]);
+
+  useEffect(() => {
+    if (!isMobile || !navOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [isMobile, navOpen]);
+
+  useEffect(() => {
+    if (!isMobile) setNavOpen(false);
+  }, [isMobile]);
 
   useEffect(() => {
     if (!resizing) return;
@@ -5911,8 +5943,18 @@ export default function App() {
 
       {/* ── LEFT SIDEBAR ── */}
       {showSidebarPanel && (
-      <div className={`bio-no-print bio-sidebar bio-sidebar-enter${navOpen ? " bio-open" : ""}`} style={{ position:"relative", width: effectiveSidebar ? sidebarWidth : 310, minWidth:220, maxWidth:480, flexShrink:0, display:"flex", flexDirection:"column", borderRight:`1px solid ${t.border}`, background:t.elevated }}>
-        {effectiveSidebar && (
+      <div
+        className={`bio-no-print bio-sidebar bio-sidebar-enter${!isMobile && navOpen ? " bio-open" : ""}`}
+        style={isMobile ? {
+          display:"flex", flexDirection:"column",
+          borderRight:`1px solid ${t.border}`, background:t.elevated,
+        } : {
+          position:"relative", width: sidebarWidth, minWidth:220, maxWidth:480, flexShrink:0,
+          display:"flex", flexDirection:"column",
+          borderRight:`1px solid ${t.border}`, background:t.elevated,
+        }}
+      >
+        {effectiveSidebar && !isMobile && (
         <div
           className={`bio-resize-handle${resizing ? " bio-resizing" : ""}`}
           onMouseDown={startResize}
@@ -5988,7 +6030,7 @@ export default function App() {
           <div className="bio-headrow" style={{ display:"flex", alignItems:"flex-start", gap:12, marginBottom: effectiveHeaderExtras ? 18 : 0 }}>
             <button
               className="bio-hamburger bio-actbtn"
-              onClick={() => { if (!sidebarVisible) patchLayout({ sidebarVisible: true }); setNavOpen(true); }}
+              onClick={() => { if (!isMobile && !sidebarVisible) patchLayout({ sidebarVisible: true }); setNavOpen(true); }}
               aria-label="Otvoriť zoznam zadaní"
               style={{ border:`1px solid ${t.border}`, background:"transparent", color:t.text, borderRadius:6, cursor:"pointer", padding:"7px 9px", flexShrink:0, lineHeight:0, marginTop:2 }}
             >
